@@ -35,6 +35,7 @@
  */
 - (NSString * _Nonnull)postWithAPI:(NSString * _Nonnull)api
                             params:(NSDictionary * _Nullable)params
+                         HUDString:(NSString *_Nullable) HUDString
                            success:(void (^ _Nullable)(id _Nullable responseObject))success
                            failure:(void (^ _Nullable)(NSString * _Nullable errorString))failure;
 
@@ -49,11 +50,8 @@
  */
 - (NSString * _Nonnull)getWithAPI:(NSString * _Nonnull)api
                             params:(NSDictionary * _Nullable)params
+                        HUDString:(NSString *_Nullable) HUDString
                            success:(void (^ _Nullable)(id _Nullable responseObject))success
                            failure:(void (^ _Nullable)(NSString * _Nullable errorString))failure;
-#pragma mark - upload image
-- (NSURLSessionDataTask * _Nonnull)uploadImages:(NSArray<UIImage *> *_Nonnull)images
-                                        success:(void (^_Nullable)(NSArray<NSString *> *_Nonnull imageURLStrings))success
-                                        failure:(void (^_Nullable)(NSURLSessionDataTask *_Nullable task, NSError *_Nullable error))failure;
 
 @end

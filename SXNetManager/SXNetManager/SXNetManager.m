@@ -172,91 +172,22 @@ static void *cacheQueueKey;
 //post
 - (NSString * _Nonnull)postWithAPI:(NSString * _Nonnull)api
                             params:(NSDictionary * _Nullable)params
+                         HUDString:(NSString *_Nullable) HUDString
                            success:(void (^ _Nullable)(id _Nullable responseObject))success
                            failure:(void (^ _Nullable)(NSString * _Nullable errorString))failure {
-    return [self requestWithAPI:api method:RequestMethodPost params:params needCache:NO success:success failure:failure];
+    return [self requestWithAPI:api method:RequestMethodPost params:params useCache:NULL HUDString:HUDString
+ success:success failure:failure];
 }
 
 //get
 - (NSString * _Nonnull)getWithAPI:(NSString * _Nonnull)api
                            params:(NSDictionary * _Nullable)params
+                        HUDString:(NSString *_Nullable) HUDString
                           success:(void (^ _Nullable)(id _Nullable responseObject))success
                           failure:(void (^ _Nullable)(NSString * _Nullable errorString))failure {
-    return [self requestWithAPI:api method:RequestMethodGet params:params needCache:NO success:success failure:failure];
+    return [self requestWithAPI:api method:RequestMethodGet params:params  useCache:NULL HUDString:HUDString success:success failure:failure];
 }
 
-//上传图片
-- (NSURLSessionDataTask * _Nonnull)uploadImages:(NSArray<UIImage *> *_Nonnull)images
-
-                                        success:(void (^_Nullable)(NSArray<NSString *> *_Nonnull imageURLStrings))success
-
-                                        failure:(void (^_Nullable)(NSURLSessionDataTask *_Nullable task, NSError *_Nullable error))failure {
-    
-    AFHTTPSessionManager    *singleManager = [[AFHTTPSessionManager alloc]initWithBaseURL:[NSURL  URLWithString:@""]];
-    singleManager.operationQueue.maxConcurrentOperationCount = 4 ;
-    
-    singleManager.requestSerializer = [AFHTTPRequestSerializer serializer];
-    singleManager.responseSerializer = [AFJSONResponseSerializer serializer];
-    //
-    singleManager.responseSerializer.acceptableContentTypes =
-    [NSSet setWithObjects:@"application/json", @"text/json", @"text/javascript",@"text/html", nil];
-    singleManager.requestSerializer.timeoutInterval = 15;
-    
-    
-    MBProgressHUD *hud =
-    [MBProgressHUD showHUDAddedTo:[self getCurrentView] animated:YES];
-    [[self getCurrentView] endEditing:YES];
-    hud.label.text = @"加载中...";
-    
-    
-    NSURLSessionDataTask *task = [singleManager POST:@"Common/govExciseImg" parameters:nil constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
-        @autoreleasepool {
-            
-            for (int i = 0; i< images.count; i++) {
-                
-                UIImage *image = images[i];
-                NSData *data = UIImagePNGRepresentation(image);
-                NSString *currentDateString =
-                [self stringWithFormat:@"yyyy/MM/dd日/HH/mm/ss" fromDate:[NSDate date]];
-                NSString *dateString = [NSString stringWithFormat:@"%@/%i.png", currentDateString, i];
-                NSString *name = dateString;
-                // 一般后台都要要求  file
-                name = @"file";
-                NSString *fileName = dateString;
-                NSAssert([name hasSuffix:@".png"], @"没有以.png命名");
-                NSAssert([fileName hasSuffix:@".png"], @"没有以.png命名");
-                
-                [formData appendPartWithFileData:data
-                                            name:name
-                                        fileName:fileName
-                                        mimeType:[self mimeTypeForData:data]];
-            }
-            
-        }
-        
-    } progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [hud hideAnimated:YES];
-        });
-        
-        NSArray<NSString *> *imageURLStrings = responseObject[@"returnData"];
-        if ([imageURLStrings isKindOfClass:[NSArray class]]) {
-            success(imageURLStrings);
-        } else {
-            NSString *errorString = responseObject[@"returnData"][@"message"];
-            NSError *error = [[NSError alloc] initWithDomain:@"上传图片出错" code:10001 userInfo:@{NSLocalizedDescriptionKey:errorString}];
-            if (failure) {
-                failure(task,error);
-            }
-        }
-    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [hud hideAnimated:YES];
-        });
-        failure(task, error);
-    }];
-    return task;
-}
 
 #pragma mark - category method
 - (UIView *)getCurrentView {
@@ -298,7 +229,8 @@ static void *cacheQueueKey;
 - (NSString * _Nonnull)requestWithAPI:(NSString * _Nonnull)api
                                method:(RequestMethod)method
                                params:(NSDictionary * _Nullable)params
-                            needCache:(BOOL)isNeedCache
+                             useCache:(void (^ _Nullable)(id _Nullable cacheObject))cacheBlock
+                            HUDString:(NSString *_Nullable) HUDString
                               success:(void (^ _Nullable)(id _Nullable responseObject))success
                               failure:(void (^ _Nullable)(NSString * _Nullable errorString))failure {
     // 去掉首尾中间的空格
@@ -311,20 +243,21 @@ static void *cacheQueueKey;
         cacheKey = [cacheKey stringByAppendingString:paramsString];
     }
     
-    if (isNeedCache) {
-        id object = [self.yycache objectForKey:cacheKey];
+    
+    if (cacheBlock) {
         
-        if (object) {
-            success(object);
-            return hash;
-        }
+        cacheBlock([self.yycache objectForKey:cacheKey]);
     }
     
+    MBProgressHUD *hud = nil;
     
-    // [self getCurrentView]
-    MBProgressHUD *hud =
-    [MBProgressHUD showHUDAddedTo:[UIApplication sharedApplication].keyWindow animated:YES];
-    hud.label.text = @"加载中...";
+    if (HUDString.length != 0)
+    {
+        hud = [MBProgressHUD showHUDAddedTo:[UIApplication sharedApplication].keyWindow animated:YES];
+        hud.label.text = HUDString;
+        
+    }
+
     /// 重复请求
     if ([[_taskCache allKeys] containsObject: cacheKey]) {
         return cacheKey;
@@ -345,13 +278,14 @@ static void *cacheQueueKey;
                 NSString *errorMsg = responseDic[@"message"];
                 if (status == 1 ) {
                     
-                    if (isNeedCache) {
+                    if (cacheBlock) {
                         
                         if ([data isKindOfClass:[NSDictionary class]] ||
                             [data isKindOfClass:[NSArray class]]) {
                             [self.yycache setObject:data forKey:cacheKey];
                         }
                     }
+
                     success(data);
                 } else {
                     failure(errorMsg);
