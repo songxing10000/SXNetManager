@@ -121,8 +121,9 @@ static void *cacheQueueKey;
         cacheQueueKey = &cacheQueueKey;
         dispatch_queue_set_specific(_cacheQueue, cacheQueueKey, (__bridge void *)self, NULL);
         _manager = [[AFHTTPSessionManager alloc] initWithBaseURL:[NSURL URLWithString:kBaseURLString] sessionConfiguration:config];
-        _manager.responseSerializer = [AFJSONResponseSerializer serializer];
-        _manager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json", @"text/json", @"text/javascript", @"text/html", nil];
+//        _manager.responseSerializer = [AFJSONResponseSerializer serializer];
+        _manager.responseSerializer = [AFHTTPResponseSerializer serializer];
+        _manager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"text/html", nil];
         
         [_manager.requestSerializer setCachePolicy:NSURLRequestReloadIgnoringLocalCacheData];
         
@@ -271,26 +272,8 @@ static void *cacheQueueKey;
         });
         if ( success )
         {
-            if ([responseObject isKindOfClass:[NSDictionary class]]) {
-                NSDictionary *responseDic = (NSDictionary *)responseObject;
-                NSInteger status = [responseDic[@"status"] integerValue];
-                id data = responseDic[@"returnData"];
-                NSString *errorMsg = responseDic[@"message"];
-                if (status == 1 ) {
-                    
-                    if (cacheBlock) {
-                        
-                        if ([data isKindOfClass:[NSDictionary class]] ||
-                            [data isKindOfClass:[NSArray class]]) {
-                            [self.yycache setObject:data forKey:cacheKey];
-                        }
-                    }
-
-                    success(data);
-                } else {
-                    failure(errorMsg);
-                }
-            }
+            success([[NSString alloc] initWithData:responseObject encoding:NSUTF8StringEncoding]);
+        
         }
         [self removeWithKey:hash];
     };
