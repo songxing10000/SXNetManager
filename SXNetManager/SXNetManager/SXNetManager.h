@@ -15,14 +15,7 @@
 
 + (_Nonnull instancetype)manager;
 
-/**
- *  根据 hash key 来取消对应的请求
- *
- *  @param key hash key
- */
-- (void)cancelTaskWithKey:(NSString * _Nonnull)key;
-- (void)removeAllCacheWithProgressBlock:(void(^ _Nullable)(int removedCount, int totalCount))progress
-                               endBlock:(void(^ _Nullable)(BOOL error))end;
+
 
 /**
  *  发起 post 请求
@@ -33,7 +26,7 @@
  *  @param failure
  *  @return 本次请求的 hash
  */
-- (NSString * _Nonnull)postWithAPI:(NSString * _Nonnull)api
+- (NSString * _Nonnull)post:(NSString * _Nonnull)api
                             params:(NSDictionary * _Nullable)params
                          HUDString:(NSString *_Nullable) HUDString
                            success:(void (^ _Nullable)(id _Nullable responseObject))success
@@ -54,4 +47,13 @@
                            success:(void (^ _Nullable)(id _Nullable responseObject))success
                            failure:(void (^ _Nullable)(NSString * _Nullable errorString))failure;
 
+
+/**
+ *  根据 hash key 来取消对应的请求
+ *
+ *  @param key hash key
+ */
+- (void)cancelTaskWithKey:(NSString * _Nonnull)key;
+- (void)removeAllCacheWithProgressBlock:(void(^ _Nullable)(int removedCount, int totalCount))progress
+                               endBlock:(void(^ _Nullable)(BOOL error))end;
 @end

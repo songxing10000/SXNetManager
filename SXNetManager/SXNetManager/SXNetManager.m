@@ -171,7 +171,7 @@ static void *cacheQueueKey;
 }
 
 //post
-- (NSString * _Nonnull)postWithAPI:(NSString * _Nonnull)api
+- (NSString * _Nonnull)post:(NSString * _Nonnull)api
                             params:(NSDictionary * _Nullable)params
                          HUDString:(NSString *_Nullable) HUDString
                            success:(void (^ _Nullable)(id _Nullable responseObject))success
