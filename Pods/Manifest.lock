@@ -15,20 +15,18 @@ PODS:
   - AFNetworking/UIKit (3.1.0):
     - AFNetworking/NSURLSession
   - MBProgressHUD (1.0.0)
-  - YYKit (1.0.9):
-    - YYKit/no-arc (= 1.0.9)
-  - YYKit/no-arc (1.0.9)
+  - YYCache (1.0.4)
 
 DEPENDENCIES:
   - AFNetworking
   - MBProgressHUD
-  - YYKit
+  - YYCache (~> 1.0.4)
 
 SPEC CHECKSUMS:
   AFNetworking: 5e0e199f73d8626b11e79750991f5d173d1f8b67
   MBProgressHUD: 4890f671c94e8a0f3cf959aa731e9de2f036d71a
-  YYKit: 7cda43304a8dc3696c449041e2cb3107b4e236e7
+  YYCache: 8105b6638f5e849296c71f331ff83891a4942952
 
-PODFILE CHECKSUM: cab75e48c163462ec10ada1eb29d5136868e143e
+PODFILE CHECKSUM: ebc0bbbeef4de3c8cfa834bd17523927649eba84
 
-COCOAPODS: 1.0.1
+COCOAPODS: 1.1.1

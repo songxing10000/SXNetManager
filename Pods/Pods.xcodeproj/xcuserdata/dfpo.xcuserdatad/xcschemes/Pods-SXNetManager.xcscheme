@@ -14,7 +14,7 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = 'primary'
-               BlueprintIdentifier = '682C0C15FC210AC3B733AF55F87DBC14'
+               BlueprintIdentifier = '16F19E9E30E80D0D9A56A2C25F1C94D9'
                BlueprintName = 'Pods-SXNetManager'
                ReferencedContainer = 'container:Pods.xcodeproj'
                BuildableName = 'libPods-SXNetManager.a'>

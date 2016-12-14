@@ -7,7 +7,7 @@ inhibit_all_warnings!
 target 'SXNetManager' do
 
 pod "AFNetworking"
-pod "YYKit"
+pod 'YYCache', '~> 1.0.4'
 pod "MBProgressHUD"
 
 end
