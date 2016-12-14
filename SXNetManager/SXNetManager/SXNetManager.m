@@ -272,7 +272,14 @@ static void *cacheQueueKey;
         });
         if ( success )
         {
-            success([[NSString alloc] initWithData:responseObject encoding:NSUTF8StringEncoding]);
+            success(responseObject);
+            
+            if (cacheBlock) {
+                if ([responseObject isKindOfClass:[NSArray class]] ||
+                    [responseObject isKindOfClass:[NSDictionary class]]) {
+                    [self.yycache setObject:responseObject forKey:cacheKey];
+                }
+            }
         
         }
         [self removeWithKey:hash];
