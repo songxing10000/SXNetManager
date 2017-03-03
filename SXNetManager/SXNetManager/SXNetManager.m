@@ -189,7 +189,17 @@ static void *cacheQueueKey;
     return [self requestWithAPI:api method:RequestMethodGet params:params  useCache:NULL HUDString:HUDString success:success failure:failure];
 }
 
+    
 
+
+
+//- (id)cachedResponseObject:(AFHTTPRequestOperation *)operation{
+//    
+//    NSCachedURLResponse* cachedResponse = [[NSURLCache sharedURLCache] cachedResponseForRequest:operation.request];
+//    AFHTTPResponseSerializer* serializer = [AFJSONResponseSerializer serializer];
+//    id responseObject = [serializer responseObjectForResponse:cachedResponse.response data:cachedResponse.data error:nil];
+//    return responseObject; 
+//}
 #pragma mark - category method
 - (UIView *)getCurrentView {
     
@@ -220,9 +230,7 @@ static void *cacheQueueKey;
 - (YYCache *)yycache
 {
     if (!_yycache) {
-        _yycache = [[YYCache alloc] initWithName:WTNetManagerRequestCache];
-        _yycache.memoryCache.shouldRemoveAllObjectsOnMemoryWarning = YES;
-        _yycache.memoryCache.shouldRemoveAllObjectsWhenEnteringBackground = YES;
+        _yycache = [YYCache cacheWithName:WTNetManagerRequestCache];
     }
     return _yycache;
 }
@@ -263,6 +271,9 @@ static void *cacheQueueKey;
     if ([[_taskCache allKeys] containsObject: cacheKey]) {
         return cacheKey;
     }
+    
+    
+    
     
     void (^ respondSuccessBlock)(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) =
     ^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
@@ -308,8 +319,22 @@ static void *cacheQueueKey;
         [self removeWithKey:hash];
     };
     
+    
+    if (!_manager.reachabilityManager.isReachable){
+        _manager.requestSerializer.cachePolicy = NSURLRequestReturnCacheDataElseLoad;
+    }else{
+        _manager.requestSerializer.cachePolicy = NSURLRequestReloadIgnoringCacheData;
+    }
+    
+    
     NSURLSessionDataTask *task = nil;
     if (method == RequestMethodGet) {
+        
+        YYCache *etagCache = [YYCache cacheWithName:@"URLETagCache"];
+        NSString *etag = (NSString *)[etagCache objectForKey:cacheKey];
+        if (etag != nil){
+            [_manager.requestSerializer setValue:etag forHTTPHeaderField:@"If-None-Match"];
+        }
         
         task = [_manager GET:api parameters:params progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
             

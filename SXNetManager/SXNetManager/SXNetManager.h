@@ -8,6 +8,9 @@
 
 #import <UIKit/UIKit.h>
 #import <Foundation/Foundation.h>
+
+typedef void (^ _Nullable requestSuccessBlock)(id _Nullable responseObject);
+typedef void (^ _Nullable requestFailureBlock)(NSString * _Nullable errorString);
 /**
  *  网络
  */
@@ -29,8 +32,8 @@
 - (NSString * _Nonnull)post:(NSString * _Nonnull)api
                             params:(NSDictionary * _Nullable)params
                          HUDString:(NSString *_Nullable) HUDString
-                           success:(void (^ _Nullable)(id _Nullable responseObject))success
-                           failure:(void (^ _Nullable)(NSString * _Nullable errorString))failure;
+                           success:(requestSuccessBlock)success
+                           failure:(requestFailureBlock)failure;
 
 /**
  *  发起 get 请求
@@ -44,8 +47,8 @@
 - (NSString * _Nonnull)getWithAPI:(NSString * _Nonnull)api
                             params:(NSDictionary * _Nullable)params
                         HUDString:(NSString *_Nullable) HUDString
-                           success:(void (^ _Nullable)(id _Nullable responseObject))success
-                           failure:(void (^ _Nullable)(NSString * _Nullable errorString))failure;
+                           success:(requestSuccessBlock)success
+                           failure:(requestFailureBlock)failure;
 
 
 /**
